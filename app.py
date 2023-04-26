@@ -1,6 +1,10 @@
 from flask import Flask, jsonify, request
 
 import di
+from services.face_detection_service import FaceDetectionService
+from services.face_enrolling_service import FaceEnrollingService
+from services.face_searching_service import FaceSearchingService
+from services.image_deletion_service import ImageDeletionService
 
 app = Flask(__name__)
 
@@ -23,7 +27,7 @@ def face_enroll():
     image_id = request.form["image_id"]
     metadata = request.form["metadata"]
 
-    di.get_face_enrolling_service().enroll_images(
+    di.injector.get(FaceEnrollingService).enroll_images(
         images=[image_bytes],
         image_ids=[image_id],
         metadata=metadata
@@ -43,7 +47,7 @@ def face_bulk_enroll():
     images = request.files.getlist("images")
     images_bytes = [image.read() for image in images]
 
-    di.get_face_enrolling_service().enroll_images(
+    di.injector.get(FaceEnrollingService).enroll_images(
         images=images_bytes,
         image_ids=image_ids,
         metadata=metadata
@@ -62,7 +66,7 @@ def face_bulk_enroll():
 def face_detect():
     image_bytes = request.files["image"].read()
 
-    face_boxes = di.get_face_detection_service().detect_faces(image_bytes)
+    face_boxes = di.injector.get(FaceDetectionService).detect_faces(image_bytes)
 
     response_data = []
     for face_box in face_boxes:
@@ -84,7 +88,7 @@ def face_detect():
 def face_bulk_delete():
     metadata = request.form["metadata"]
     image_ids = request.form.getlist("image_ids")
-    di.get_image_deletion_service().delete_images(image_ids)
+    di.injector.get(ImageDeletionService).delete_images(image_ids)
     return jsonify({"detail": "OK"})
 
 
@@ -96,7 +100,7 @@ def search():
     page_size = int(request.form["page_size"])
     metadata = request.form["metadata"]
 
-    search_result = di.get_face_searching_service().search_image(
+    search_result = di.injector.get(FaceSearchingService).search_image(
         img_bytes=image_bytes,
         threshold=threshold
     )
