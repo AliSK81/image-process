@@ -1,6 +1,7 @@
 import uuid
 
 import face_recognition
+import numpy as np
 
 
 class FaceSearcher:

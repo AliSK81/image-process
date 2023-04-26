@@ -1,6 +1,7 @@
 from adapters.image_adapter import ImageAdapter
 from database.database import Database
 from detection.face_encoder import FaceEncoder
+from models.entities.image import Image
 
 
 class FaceEnrollingService:
@@ -17,11 +18,11 @@ class FaceEnrollingService:
         for image, image_id in zip(images, image_ids):
             image_array = self.image_adapter.bytes_to_numpy(image)
             encodings = self.face_encoder.encode_image(image_array)
-            encoded_image = {
-                'image_id': image_id,
-                'encodings': [encoding.tolist() for encoding in encodings],
-                'metadata': metadata
-            }
+            encoded_image = Image(
+                image_id=image_id,
+                encodings=list(map(lambda encoding: encoding.tolist(), encodings)),
+                metadata=metadata
+            )
             encoded_images.append(encoded_image)
 
         self.database.save_images(encoded_images)

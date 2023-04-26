@@ -1,6 +1,5 @@
-from injector import Injector, Module, provider
+from injector import Injector, Module, provider, singleton
 
-from adapters.face_detector_adapter import FaceDetectorAdapter
 from adapters.image_adapter import ImageAdapter
 from database.database import Database
 from detection.face_detector import FaceDetector
@@ -18,16 +17,13 @@ class AppModule(Module):
         return FaceEncoder()
 
     @provider
-    def provide_face_detector_adapter(self) -> FaceDetectorAdapter:
-        return FaceDetectorAdapter()
-
-    @provider
     def provide_image_adapter(self) -> ImageAdapter:
         return ImageAdapter()
 
+    @singleton
     @provider
     def provide_database(self) -> Database:
-        return Database.get_instance()
+        return Database()
 
     @provider
     def provide_face_encoding_service(
@@ -46,13 +42,11 @@ class AppModule(Module):
     def provide_face_detection_service(
             self,
             face_detector: FaceDetector,
-            image_adapter: ImageAdapter,
-            face_detector_adapter: FaceDetectorAdapter
+            image_adapter: ImageAdapter
     ) -> FaceDetectionService:
         return FaceDetectionService(
             face_detector=face_detector,
-            image_adapter=image_adapter,
-            face_detector_adapter=face_detector_adapter
+            image_adapter=image_adapter
         )
 
     @provider
