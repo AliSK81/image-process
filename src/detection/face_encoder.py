@@ -1,9 +1,12 @@
-import concurrent.futures
+import threading
+
 import face_recognition
+
 
 class FaceEncoder:
     def __init__(self):
-        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+        self.lock = threading.Lock()
 
     def encode_image(self, image):
-        return self.executor.submit(face_recognition.face_encodings, image)
+        with self.lock:
+            return face_recognition.face_encodings(image)
