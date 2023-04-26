@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 
+import di
 from adapters.face_detector_adapter import FaceDetectorAdapter
 from adapters.image_adapter import ImageAdapter
 from database.database import Database
@@ -47,20 +48,20 @@ def ping():
     return jsonify({"message": "Service is up!"})
 
 
-@app.route("/auth", methods=["POST"])
+@app.route("/api/v1/auth/", methods=["POST"])
 def login():
     username = request.form["username"]
     password = request.form["password"]
     return jsonify({"token": "temp-token"})
 
 
-@app.route("/face/enroll", methods=["POST"])
+@app.route("/api/v1/face/enroll/", methods=["POST"])
 def face_enroll():
     image_bytes = request.files["image"].read()
     image_id = request.form["image_id"]
     metadata = request.form["metadata"]
 
-    face_encoding_service.enroll_images(
+    di.get_face_enrolling_service().enroll_images(
         images=[image_bytes],
         image_ids=[image_id],
         metadata=metadata
@@ -73,14 +74,15 @@ def face_enroll():
     })
 
 
-@app.route("/face/bulkEnroll", methods=["POST"])
+@app.route("/api/v1/face/bulkEnroll/", methods=["POST"])
 def face_bulk_enroll():
     metadata = request.form["metadata"]
     image_ids = request.form.getlist("image_ids")
-    images = [request.files[f"images[{i}]"].read() for i in range(len(image_ids))]
+    images = request.files.getlist("images")
+    images_bytes = [image.read() for image in images]
 
-    face_encoding_service.enroll_images(
-        images=images,
+    di.get_face_enrolling_service().enroll_images(
+        images=images_bytes,
         image_ids=image_ids,
         metadata=metadata
     )
@@ -94,33 +96,38 @@ def face_bulk_enroll():
     return jsonify(response_data)
 
 
-@app.route("/face/detect", methods=["POST"])
+@app.route("/api/v1/face/detect/", methods=["POST"])
 def face_detect():
     image_bytes = request.files["image"].read()
 
     face_boxes, face_templates, face_confidence, face_landmarks = \
-        face_detection_service.detect_faces(image_bytes)
+        di.get_face_detection_service().detect_faces(image_bytes)
 
-    response_data = [{
-        "faceBox": face_box,
-        "confidence": confidence,
-        "landmarks": landmarks,
-        "template": template
-    } for face_box, template, confidence, landmarks in
-        zip(face_boxes, face_templates, face_confidence, face_landmarks)]
+    response_data = []
+    for face_box, confidence in zip(face_boxes, face_confidence):
+        a, b, c, d = face_box
+        left_down = [b, a]
+        right_up = [d, c]
+        height = left_down[0] - right_up[0]
+        left_up = [left_down[0] - height, left_down[1]]
+        right_down = [right_up[0] + height, right_up[1]]
+        response_data.append({
+            "faceBox": [left_up, right_down],
+            "confidence": confidence
+        })
 
     return jsonify(response_data)
 
 
-@app.route("/face/bulkDelete", methods=["POST"])
+@app.route("/api/v1/face/bulkDelete/", methods=["POST"])
 def face_bulk_delete():
     metadata = request.form["metadata"]
     image_ids = request.form.getlist("image_ids")
-    image_deletion_service.delete_images(image_ids)
+    di.get_image_deletion_service().delete_images(image_ids)
     return jsonify({"detail": "OK"})
 
 
-@app.route("/search", methods=["POST"])
+@app.route("/api/v1/search/", methods=["POST"])
 def search():
     image_bytes = request.files["image"].read()
     threshold = float(request.form["threshold"])
@@ -128,7 +135,7 @@ def search():
     page_size = int(request.form["page_size"])
     metadata = request.form["metadata"]
 
-    search_result = face_searching_service.search_image(
+    search_result = di.get_face_searching_service().search_image(
         img_bytes=image_bytes,
         threshold=threshold
     )
@@ -137,4 +144,4 @@ def search():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='localhost', port=5000)

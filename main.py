@@ -51,8 +51,8 @@ if __name__ == "__main__":
     plt.show()
 
     face_detection_service = FaceEnrollingService(face_encoder=face_encoder, database=db)
-    face_detection_service.enroll_images(images=[known_faces])
-
-    face_search_service = FaceSearchingService(face_searcher=face_searcher, image_adapter=img_adapter, database=db)
-    search_result = face_search_service.search_image(request=ImageSearchRequest(file_content=unknown_faces_bytes))
-    print(search_result)
+    # face_detection_service.enroll_images(images=[known_faces])
+    #
+    # face_search_service = FaceSearchingService(face_searcher=face_searcher, image_adapter=img_adapter, database=db)
+    # search_result = face_search_service.search_image(request=ImageSearchRequest(file_content=unknown_faces_bytes))
+    # print(search_result)
