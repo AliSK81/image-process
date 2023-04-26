@@ -3,6 +3,8 @@ from typing import List
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
+import di
+from common.logger import Logger
 from models.entities.image import Image
 
 
@@ -18,9 +20,11 @@ class Database:
             print("Error connecting to database: ", e)
 
     def save_images(self, images: List[Image]):
+        di.injector.get(Logger).log('save images in database started')
         connection = self.get_connection()
         face_metadata_collection = connection.get_collection('images')
         face_metadata_collection.insert_many([image.__dict__ for image in images])
+        di.injector.get(Logger).log('save images in database done')
 
     def find_all_images(self) -> List[Image]:
         connection = self.get_connection()
