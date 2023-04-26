@@ -1,46 +1,8 @@
 from flask import Flask, jsonify, request
 
 import di
-from adapters.face_detector_adapter import FaceDetectorAdapter
-from adapters.image_adapter import ImageAdapter
-from database.database import Database
-from detection.face_detector import FaceDetector
-from detection.face_encoder import FaceEncoder
-from detection.face_searcher import FaceSearcher
-from services.face_detection_service import FaceDetectionService
-from services.face_enrolling_service import FaceEnrollingService
-from services.face_searching_service import FaceSearchingService
-from services.image_deletion_service import ImageDeletionService
 
 app = Flask(__name__)
-
-face_encoder = FaceEncoder()
-face_detector_adapter = FaceDetectorAdapter()
-image_adapter = ImageAdapter()
-database = Database.get_instance()
-
-face_encoding_service = FaceEnrollingService(
-    face_encoder=face_encoder,
-    image_adapter=image_adapter,
-    database=database
-)
-
-face_detection_service = FaceDetectionService(
-    face_detector=FaceDetector(),
-    image_adapter=image_adapter,
-    face_detector_adapter=face_detector_adapter
-)
-
-face_searching_service = FaceSearchingService(
-    face_searcher=FaceSearcher(),
-    image_adapter=image_adapter,
-    face_encoder=face_encoder,
-    database=database
-)
-
-image_deletion_service = ImageDeletionService(
-    database=database
-)
 
 
 @app.route("/", methods=["GET"])
@@ -100,11 +62,10 @@ def face_bulk_enroll():
 def face_detect():
     image_bytes = request.files["image"].read()
 
-    face_boxes, face_templates, face_confidence, face_landmarks = \
-        di.get_face_detection_service().detect_faces(image_bytes)
+    face_boxes = di.get_face_detection_service().detect_faces(image_bytes)
 
     response_data = []
-    for face_box, confidence in zip(face_boxes, face_confidence):
+    for face_box in face_boxes:
         a, b, c, d = face_box
         left_down = [b, a]
         right_up = [d, c]
@@ -113,7 +74,7 @@ def face_detect():
         right_down = [right_up[0] + height, right_up[1]]
         response_data.append({
             "faceBox": [left_up, right_down],
-            "confidence": confidence
+            "confidence": 1
         })
 
     return jsonify(response_data)
