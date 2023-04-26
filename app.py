@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 
 import di
+from common.logger import Logger
 from services.face_detection_service import FaceDetectionService
 from services.face_enrolling_service import FaceEnrollingService
 from services.face_searching_service import FaceSearchingService
@@ -11,6 +12,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET"])
 def ping():
+    di.injector.get(Logger).log('service is up')
     return jsonify({"message": "Service is up!"})
 
 
@@ -42,16 +44,22 @@ def face_enroll():
 
 @app.route("/api/v1/face/bulkEnroll/", methods=["POST"])
 def face_bulk_enroll():
+    di.injector.get(Logger).log('bulk enroll started')
+
     metadata = request.form["metadata"]
     image_ids = request.form.getlist("image_ids")
     images = request.files.getlist("images")
     images_bytes = [image.read() for image in images]
+
+    di.injector.get(Logger).log('bulk data ready')
 
     di.injector.get(FaceEnrollingService).enroll_images(
         images=images_bytes,
         image_ids=image_ids,
         metadata=metadata
     )
+
+    di.injector.get(Logger).log('bulk enroll done')
 
     response_data = [{
         "image_id": image_id,

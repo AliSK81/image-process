@@ -1,6 +1,7 @@
 from injector import Injector, Module, provider, singleton
 
 from adapters.image_adapter import ImageAdapter
+from common.logger import Logger
 from database.database import Database
 from detection.face_detector import FaceDetector
 from detection.face_encoder import FaceEncoder
@@ -72,6 +73,11 @@ class AppModule(Module):
         return ImageDeletionService(
             database=database
         )
+
+    @singleton
+    @provider
+    def provider_logger(self) -> Logger:
+        return Logger(filename='app.log')
 
 
 injector = Injector(AppModule())
