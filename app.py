@@ -103,6 +103,7 @@ def search():
     # page = int(request.form["page"])
     # page_size = int(request.form["page_size"])
     # metadata = request.form["metadata"]
+    di.injector.get(Logger).log(f'search request with threshold {threshold}')
 
     search_result = di.injector.get(FaceSearchingService).search_image(
         img_bytes=image_bytes,

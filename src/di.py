@@ -1,3 +1,5 @@
+import os
+
 from injector import Injector, Module, provider, singleton
 
 from adapters.image_adapter import ImageAdapter
@@ -25,7 +27,8 @@ class AppModule(Module):
     @singleton
     @provider
     def provide_database(self) -> Database:
-        return Database()
+        return Database(host=os.environ.get('MONGO_DB_HOST', 'localhost'),
+                        port=int(os.environ.get('MONGO_DB_PORT', '27017')))
 
     @provider
     def provide_face_encoding_service(
