@@ -13,6 +13,7 @@ from services.image_deletion_service import ImageDeletionService
 
 
 class AppModule(Module):
+    @singleton
     @provider
     def provide_face_encoder(self) -> FaceEncoder:
         return FaceEncoder()

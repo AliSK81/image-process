@@ -1,5 +1,6 @@
 import datetime
 import sys
+import threading
 
 
 class Logger:
@@ -8,7 +9,8 @@ class Logger:
 
     def log(self, message):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        log_message = f'[{timestamp}] {message}'
+        thread_id = threading.get_ident()
+        log_message = f'[{timestamp}] [Thread-{thread_id}] {message}'
         with open(self.filename, 'a') as f:
             f.write(log_message + '\n')
         print(log_message, file=sys.stdout)

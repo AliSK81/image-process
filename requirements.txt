@@ -5,3 +5,5 @@ Pillow~=9.5.0
 pymongo~=4.3.3
 injector~=0.20.1
 matplotlib~=3.7.1
+torch
+facenet-pytorch

@@ -44,22 +44,18 @@ def face_enroll():
 
 @app.route("/api/v1/face/bulkEnroll/", methods=["POST"])
 def face_bulk_enroll():
-    di.injector.get(Logger).log('bulk enroll started')
+    di.injector.get(Logger).log('new bulk enroll request')
 
     metadata = request.form["metadata"]
     image_ids = request.form.getlist("image_ids")
     images = request.files.getlist("images")
     images_bytes = [image.read() for image in images]
 
-    di.injector.get(Logger).log('bulk data ready')
-
     di.injector.get(FaceEnrollingService).enroll_images(
         images=images_bytes,
         image_ids=image_ids,
         metadata=metadata
     )
-
-    di.injector.get(Logger).log('bulk enroll done')
 
     response_data = [{
         "image_id": image_id,
@@ -104,16 +100,16 @@ def face_bulk_delete():
 def search():
     image_bytes = request.files["image"].read()
     threshold = float(request.form["threshold"])
-    page = int(request.form["page"])
-    page_size = int(request.form["page_size"])
-    metadata = request.form["metadata"]
+    # page = int(request.form["page"])
+    # page_size = int(request.form["page_size"])
+    # metadata = request.form["metadata"]
 
     search_result = di.injector.get(FaceSearchingService).search_image(
         img_bytes=image_bytes,
         threshold=threshold
     )
 
-    return jsonify(search_result)
+    return jsonify([search_result])
 
 
 if __name__ == '__main__':
