@@ -1,6 +1,5 @@
 import multiprocessing as mp
 import face_recognition
-from common.logger import Logger
 
 
 class FaceEncoder:
