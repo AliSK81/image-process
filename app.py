@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_caching import Cache
 
 import di
 from common.logger import Logger
@@ -8,6 +9,7 @@ from services.face_searching_service import FaceSearchingService
 from services.image_deletion_service import ImageDeletionService
 
 app = Flask(__name__)
+cache = Cache(app)
 
 
 @app.route("/", methods=["GET"])
@@ -69,6 +71,7 @@ def face_bulk_enroll():
 
 
 @app.route("/api/v1/face/detect/", methods=["POST"])
+@cache.cached(timeout=3600)
 def face_detect():
     di.injector.get(Logger).log(f'detection request')
 
@@ -105,6 +108,7 @@ def face_bulk_delete():
 
 
 @app.route("/api/v1/search/", methods=["POST"])
+@cache.cached(timeout=60)
 def search():
     image_bytes = request.files["image"].read()
     threshold = float(request.form["threshold"])
