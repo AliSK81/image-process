@@ -110,6 +110,8 @@ def search():
         threshold=threshold
     )
 
+    di.injector.get(Logger).log(f'search result:\n{search_result}')
+
     return jsonify([search_result])
 
 
