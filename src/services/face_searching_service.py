@@ -1,3 +1,5 @@
+import json
+
 from adapters.image_adapter import ImageAdapter
 from database.database import Database
 from detection.face_encoder import FaceEncoder
@@ -12,9 +14,9 @@ class FaceSearchingService:
         self.face_encoder = face_encoder
         self.database = database
 
-    def search_image(self, img_bytes, threshold):
+    def search_image(self, img_bytes, threshold, metadata):
         image = self.image_adapter.bytes_to_numpy(img_bytes=img_bytes, grayscale=False)
         query_encoding = self.face_encoder.encode_image(image)[0]
-        images = self.database.find_all_images()
+        images = self.database.get_images(json.loads(metadata))
         matched_faces = self.face_searcher.search(query_encoding=query_encoding, images=images, threshold=threshold)
         return matched_faces

@@ -39,6 +39,24 @@ class Database:
             images.append(image)
         return images
 
+    def get_images(self, metadata_filter: dict) -> List[Image]:
+        connection = self.get_connection()
+        images_collection = connection.get_collection('images')
+
+        elem_match = {}
+        for key, value in metadata_filter.items():
+            elem_match[f"metadata.{key}"] = {"$elemMatch": value}
+
+        documents = images_collection.find({"$and": [elem_match]})
+
+        images = []
+        for document in documents:
+            image = Image(image_id=document['image_id'],
+                          encodings=document['encodings'],
+                          metadata=document['metadata'])
+            images.append(image)
+        return images
+
     def delete_images(self, image_ids: List[str]) -> int:
         connection = self.get_connection()
         images_collection = connection.get_collection('images')

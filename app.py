@@ -134,10 +134,14 @@ import hashlib
 def search():
     image_bytes = request.files["image"].read()
     threshold = float(request.form["threshold"])
-    # page = int(request.form["page"])
-    # page_size = int(request.form["page_size"])
-    # metadata = request.form["metadata"]
-    di.injector.get(Logger).log(f'search request - threshold: {threshold}')
+    page = int(request.form["page"])
+    page_size = int(request.form["page_size"])
+    metadata = request.form["metadata"]
+
+    di.injector.get(Logger).log(f'search request - threshold: {threshold},'
+                                f' page: {page},'
+                                f' page_size: {page_size},'
+                                f' metadata: {metadata}')
 
     file_hash = hashlib.sha256(image_bytes).hexdigest()
     cache_key = f'search-{file_hash}-{threshold}'
@@ -149,7 +153,8 @@ def search():
 
     search_result = di.injector.get(FaceSearchingService).search_image(
         img_bytes=image_bytes,
-        threshold=threshold
+        threshold=threshold,
+        metadata=metadata
     )
 
     response = jsonify([search_result])
