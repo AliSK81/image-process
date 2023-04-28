@@ -12,11 +12,11 @@ from services.face_enrolling_service import FaceEnrollingService
 from services.face_searching_service import FaceSearchingService
 from services.image_deletion_service import ImageDeletionService
 
-config = {
-    "DEBUG": True,
-    "CACHE_TYPE": "SimpleCache",
-    "CACHE_DEFAULT_TIMEOUT": 300
-}
+config = dict(
+    DEBUG=True,
+    CACHE_TYPE='SimpleCache'
+)
+
 app = Flask(__name__)
 app.config.from_mapping(config)
 cache = Cache(app)
