@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append("src")
+
 from flask import Flask, jsonify, request
 from flask_caching import Cache
 
@@ -8,7 +12,13 @@ from services.face_enrolling_service import FaceEnrollingService
 from services.face_searching_service import FaceSearchingService
 from services.image_deletion_service import ImageDeletionService
 
+config = {
+    "DEBUG": True,
+    "CACHE_TYPE": "SimpleCache",
+    "CACHE_DEFAULT_TIMEOUT": 300
+}
 app = Flask(__name__)
+app.config.from_mapping(config)
 cache = Cache(app)
 
 
@@ -71,7 +81,7 @@ def face_bulk_enroll():
 
 
 @app.route("/api/v1/face/detect/", methods=["POST"])
-@cache.cached(timeout=3600)
+@cache.cached(timeout=3600, key_prefix='face_detection')
 def face_detect():
     di.injector.get(Logger).log(f'detection request')
 
