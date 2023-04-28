@@ -14,7 +14,7 @@ class FaceSearcher:
                 {'image_id': img.image_id,
                  'face_id': str(uuid.uuid4()),
                  # 'metadata': json.loads(img.metadata),
-                 'similarity': (1-distance) * 100}
+                 'similarity': (1-distance)}
                 for distance in distances
                 if distance <= 1-threshold
             ]
