@@ -1,4 +1,3 @@
-import json
 import uuid
 
 import face_recognition
@@ -14,9 +13,9 @@ class FaceSearcher:
                 {'image_id': img.image_id,
                  'face_id': str(uuid.uuid4()),
                  # 'metadata': json.loads(img.metadata),
-                 'similarity': (1-distance)}
+                 'similarity': (1 - distance)}
                 for distance in distances
-                if distance <= 1-threshold
+                if distance <= 1 - threshold
             ]
             matched_faces.extend(matches)
         return matched_faces

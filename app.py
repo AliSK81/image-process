@@ -1,10 +1,12 @@
 import json
 import sys
+import uuid
 
 sys.path.append("src")
 
 from flask import Flask, jsonify, request
 from flask_caching import Cache
+import hashlib
 
 import di
 from common.logger import Logger
@@ -126,9 +128,6 @@ def face_bulk_delete():
     image_ids = request.form.getlist("image_ids")
     di.injector.get(ImageDeletionService).delete_images(image_ids)
     return jsonify({"detail": "OK"})
-
-
-import hashlib
 
 
 @app.route("/api/v1/search/", methods=["POST"])
