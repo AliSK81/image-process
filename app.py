@@ -29,6 +29,8 @@ def face_enroll():
     image_id = request.form["image_id"]
     metadata = request.form["metadata"]
 
+    di.injector.get(Logger).log('enroll request')
+
     di.injector.get(FaceEnrollingService).enroll_images(
         images=[image_bytes],
         image_ids=[image_id],
@@ -44,7 +46,7 @@ def face_enroll():
 
 @app.route("/api/v1/face/bulkEnroll/", methods=["POST"])
 def face_bulk_enroll():
-    di.injector.get(Logger).log('new bulk enroll request')
+    di.injector.get(Logger).log('bulk enroll request')
 
     metadata = request.form["metadata"]
     image_ids = request.form.getlist("image_ids")
@@ -68,6 +70,8 @@ def face_bulk_enroll():
 
 @app.route("/api/v1/face/detect/", methods=["POST"])
 def face_detect():
+    di.injector.get(Logger).log(f'detection request')
+
     image_bytes = request.files["image"].read()
 
     face_boxes = di.injector.get(FaceDetectionService).detect_faces(image_bytes)
@@ -85,7 +89,11 @@ def face_detect():
             "confidence": 1
         })
 
-    return jsonify(response_data)
+    response = jsonify(response_data)
+
+    di.injector.get(Logger).log(f'detection result:\n{response.json}')
+
+    return response
 
 
 @app.route("/api/v1/face/bulkDelete/", methods=["POST"])
@@ -103,14 +111,15 @@ def search():
     # page = int(request.form["page"])
     # page_size = int(request.form["page_size"])
     # metadata = request.form["metadata"]
-    di.injector.get(Logger).log(f'search request with threshold {threshold}')
+    di.injector.get(Logger).log(f'search request - threshold: {threshold}')
 
     search_result = di.injector.get(FaceSearchingService).search_image(
         img_bytes=image_bytes,
         threshold=threshold
     )
 
-    di.injector.get(Logger).log(f'search result:\n{search_result}')
+    response = jsonify([search_result])
+    di.injector.get(Logger).log(f'search result:\n{response.json}')
 
     return jsonify([search_result])
 
