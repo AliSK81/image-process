@@ -118,7 +118,7 @@ def face_bulk_delete():
 
 
 @app.route("/api/v1/search/", methods=["POST"])
-@cache.cached(timeout=60)
+@cache.cached(timeout=60, key_prefix='face_search')
 def search():
     image_bytes = request.files["image"].read()
     threshold = float(request.form["threshold"])
