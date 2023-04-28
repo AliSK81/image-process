@@ -16,7 +16,7 @@ class FaceSearcher:
                  # 'metadata': json.loads(img.metadata),
                  'similarity': (1-distance) * 100}
                 for distance in distances
-                if distance <= threshold
+                if distance <= 1-threshold
             ]
             matched_faces.extend(matches)
         return matched_faces
