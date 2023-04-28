@@ -81,11 +81,19 @@ def face_bulk_enroll():
 
 
 @app.route("/api/v1/face/detect/", methods=["POST"])
-@cache.cached(timeout=3600, key_prefix='face_detection')
 def face_detect():
     di.injector.get(Logger).log(f'detection request')
 
     image_bytes = request.files["image"].read()
+
+    file_hash = hashlib.sha256(image_bytes).hexdigest()
+    file_name = request.files["image"].filename
+    cache_key = f'{file_name}-{file_hash}'
+
+    cached_result = cache.get(cache_key)
+    if cached_result is not None:
+        di.injector.get(Logger).log(f'detection result (cached):\n{cached_result}')
+        return cached_result
 
     face_boxes = di.injector.get(FaceDetectionService).detect_faces(image_bytes)
 
@@ -106,6 +114,8 @@ def face_detect():
 
     di.injector.get(Logger).log(f'detection result:\n{response.json}')
 
+    cache.set(cache_key, response, timeout=3600)
+
     return response
 
 
@@ -117,8 +127,10 @@ def face_bulk_delete():
     return jsonify({"detail": "OK"})
 
 
+import hashlib
+
+
 @app.route("/api/v1/search/", methods=["POST"])
-@cache.cached(timeout=60, key_prefix='face_search')
 def search():
     image_bytes = request.files["image"].read()
     threshold = float(request.form["threshold"])
@@ -126,6 +138,14 @@ def search():
     # page_size = int(request.form["page_size"])
     # metadata = request.form["metadata"]
     di.injector.get(Logger).log(f'search request - threshold: {threshold}')
+
+    file_hash = hashlib.sha256(image_bytes).hexdigest()
+    cache_key = f'search-{file_hash}-{threshold}'
+
+    cached_result = cache.get(cache_key)
+    if cached_result is not None:
+        di.injector.get(Logger).log(f'search result (cached):\n{cached_result}')
+        return cached_result
 
     search_result = di.injector.get(FaceSearchingService).search_image(
         img_bytes=image_bytes,
@@ -135,7 +155,9 @@ def search():
     response = jsonify([search_result])
     di.injector.get(Logger).log(f'search result:\n{response.json}')
 
-    return jsonify([search_result])
+    cache.set(cache_key, response, timeout=60)
+
+    return response
 
 
 if __name__ == '__main__':
