@@ -1,3 +1,4 @@
+import json
 import sys
 
 sys.path.append("src")
@@ -39,7 +40,7 @@ def login():
 def face_enroll():
     image_bytes = request.files["image"].read()
     image_id = request.form["image_id"]
-    metadata = request.form["metadata"]
+    metadata = json.loads(request.form["metadata"])
 
     di.injector.get(Logger).log('enroll request')
 
@@ -60,7 +61,7 @@ def face_enroll():
 def face_bulk_enroll():
     di.injector.get(Logger).log('bulk enroll request')
 
-    metadata = request.form["metadata"]
+    metadata = json.loads(request.form["metadata"])
     image_ids = request.form.getlist("image_ids")
     images = request.files.getlist("images")
     images_bytes = [image.read() for image in images]
@@ -132,11 +133,12 @@ import hashlib
 
 @app.route("/api/v1/search/", methods=["POST"])
 def search():
+    request_form = request.form.to_dict()
     image_bytes = request.files["image"].read()
     threshold = float(request.form["threshold"])
     page = int(request.form["page"])
     page_size = int(request.form["page_size"])
-    metadata = request.form["metadata"]
+    metadata = json.loads(request.form["metadata"])
 
     di.injector.get(Logger).log(f'search request - threshold: {threshold},'
                                 f' page: {page},'
@@ -144,7 +146,7 @@ def search():
                                 f' metadata: {metadata}')
 
     file_hash = hashlib.sha256(image_bytes).hexdigest()
-    cache_key = f'search-{file_hash}-{threshold}'
+    cache_key = f'search-{file_hash}-{threshold}-{json.dumps(metadata)}'
 
     cached_result = cache.get(cache_key)
     if cached_result is not None:

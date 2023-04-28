@@ -12,7 +12,7 @@ class FaceEnrollingService:
         self.database = database
         self.image_adapter = image_adapter
 
-    def enroll_images(self, images, image_ids, metadata):
+    def enroll_images(self, images, image_ids, metadata: dict):
         if len(images) != len(image_ids):
             raise ValueError('Number of images is not equal to image_ids count.')
 

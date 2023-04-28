@@ -23,7 +23,8 @@ class Database:
         di.injector.get(Logger).log('save images in database started')
         connection = self.get_connection()
         face_metadata_collection = connection.get_collection('images')
-        face_metadata_collection.insert_many([image.__dict__ for image in images])
+        face_metadata = [image.__dict__ for image in images]
+        face_metadata_collection.insert_many(face_metadata)
         di.injector.get(Logger).log('save images in database done')
 
     def find_all_images(self) -> List[Image]:
@@ -45,7 +46,10 @@ class Database:
 
         elem_match = {}
         for key, value in metadata_filter.items():
-            elem_match[f"metadata.{key}"] = {"$elemMatch": value}
+            if isinstance(value, dict):
+                elem_match[f"metadata.{key}"] = {"$elemMatch": value}
+            else:
+                elem_match[f"metadata.{key}"] = value
 
         documents = images_collection.find({"$and": [elem_match]})
 

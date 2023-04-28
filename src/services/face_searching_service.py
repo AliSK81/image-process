@@ -17,6 +17,6 @@ class FaceSearchingService:
     def search_image(self, img_bytes, threshold, metadata):
         image = self.image_adapter.bytes_to_numpy(img_bytes=img_bytes, grayscale=False)
         query_encoding = self.face_encoder.encode_image(image)[0]
-        images = self.database.get_images(json.loads(metadata))
+        images = self.database.get_images(metadata)
         matched_faces = self.face_searcher.search(query_encoding=query_encoding, images=images, threshold=threshold)
         return matched_faces
